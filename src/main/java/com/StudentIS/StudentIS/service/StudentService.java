@@ -2,23 +2,15 @@ package com.StudentIS.StudentIS.service;
 
 import com.StudentIS.StudentIS.entity.Student;
 import com.StudentIS.StudentIS.repo.StudentRepository;
-import com.StudentIS.StudentIS.dto.Studentdto;
-import lombok.extern.slf4j.Slf4j;
-
+import com.StudentIS.StudentIS.dto.StudentDTO;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.time.LocalDate;
 import java.util.List;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 @Service
-@Slf4j
 public class StudentService {
-
     private final StudentRepository studentRepository;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -26,74 +18,45 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    @Transactional
-    public Student createStudent(Studentdto dto) throws IOException {
+    // Create
+    public Student createStudent(StudentDTO studentDTO) {
         Student student = new Student();
-        updateStudentFromDTO(student, dto);
-        return studentRepository.save(student);
+        return getStudent(studentDTO, student);
     }
 
-    @Transactional(readOnly = true)
+    // Read all
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+    // Read one
     public Student getStudent(Long id) {
         return studentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + id));
     }
 
-    @Transactional
-    public Student updateStudent(Long id, Studentdto dto) throws IOException {
+    // Update
+    public Student updateStudent(Long id, StudentDTO studentDTO) {
         Student student = getStudent(id);
-        updateStudentFromDTO(student, dto);
+        return getStudent(studentDTO, student);
+    }
+
+    private Student getStudent(StudentDTO studentDTO, Student student) {
+        student.setStudentName(studentDTO.getStudentName());
+        student.setIndexNo(studentDTO.getIndexNo());
+        student.setEmail(studentDTO.getEmail());
+        student.setContactNo(studentDTO.getContactNo());
+        if (studentDTO.getDob() != null) {
+            student.setDob(LocalDate.parse(studentDTO.getDob(), dateFormatter));
+        }
         return studentRepository.save(student);
     }
 
-    @Transactional
+    // Delete
     public void deleteStudent(Long id) {
         if (!studentRepository.existsById(id)) {
             throw new EntityNotFoundException("Student not found with id: " + id);
         }
         studentRepository.deleteById(id);
-    }
-
-    private void updateStudentFromDTO(Student student, Studentdto dto) throws IOException {
-        try {
-            if (dto.getStudentName() != null && !dto.getStudentName().trim().isEmpty()) {
-                student.setStudentName(dto.getStudentName().trim());
-            }
-
-            if (dto.getIndexNo() != null && !dto.getIndexNo().trim().isEmpty()) {
-                student.setIndexNo(dto.getIndexNo().trim());
-            }
-
-            if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
-                student.setEmail(dto.getEmail().trim());
-            }
-
-            if (dto.getContactNo() != null && !dto.getContactNo().trim().isEmpty()) {
-                student.setContactNo(dto.getContactNo().trim());
-            }
-
-            if (dto.getDob() != null && !dto.getDob().trim().isEmpty()) {
-                try {
-                    student.setDob(LocalDate.parse(dto.getDob().trim(), dateFormatter));
-                } catch (DateTimeParseException e) {
-                    log.error("Error parsing date: {}", dto.getDob(), e);
-                    throw new IllegalArgumentException("Invalid date format. Expected format: YYYY-MM-DD");
-                }
-            }
-
-            if (dto.getStudentImage() != null && !dto.getStudentImage().isEmpty()) {
-                student.setStudentImage(dto.getStudentImage().getBytes());
-            }
-
-            log.debug("Successfully mapped DTO to student entity");
-        } catch (Exception e) {
-            log.error("Error mapping DTO to student entity: ", e);
-            throw new RuntimeException("Failed to process student data: " + e.getMessage());
-        }
     }
 }
