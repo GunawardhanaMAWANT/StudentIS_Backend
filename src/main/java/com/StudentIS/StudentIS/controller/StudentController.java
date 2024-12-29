@@ -3,16 +3,15 @@ package com.StudentIS.StudentIS.controller;
 import com.StudentIS.StudentIS.entity.Student;
 import com.StudentIS.StudentIS.response.ErrorResponse;
 import com.StudentIS.StudentIS.service.StudentService;
-import com.StudentIS.StudentIS.dto.Studentdto;
+import com.StudentIS.StudentIS.dto.StudentDTO;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/students")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"},
@@ -20,7 +19,7 @@ import java.util.List;
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE},
         allowCredentials = "true")
 public class StudentController {
-
+    private static final Logger log = LoggerFactory.getLogger(StudentController.class);
     private final StudentService studentService;
 
     public StudentController(StudentService studentService) {
@@ -28,7 +27,7 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createStudent(@ModelAttribute @Valid Studentdto studentDTO) {
+    public ResponseEntity<Object> createStudent(@ModelAttribute @Valid StudentDTO studentDTO) {
         try {
             log.info("Received student creation request for: {}", studentDTO.getStudentName());
             Student created = studentService.createStudent(studentDTO);
@@ -69,7 +68,7 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateStudent(
             @PathVariable Long id,
-            @ModelAttribute @Valid Studentdto studentDTO) {
+            @ModelAttribute @Valid StudentDTO studentDTO) {
         try {
             log.info("Received student update request for ID: {}", id);
             Student updated = studentService.updateStudent(id, studentDTO);
