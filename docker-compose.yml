@@ -6,8 +6,8 @@ services:
     container_name: mysql-container
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: studentis   # Updated database name
-      MYSQL_PASSWORD: '#Ntgun1234'  # Updated password
+      MYSQL_DATABASE: studentis
+      MYSQL_PASSWORD: '#Ntgun1234'
     ports:
       - "3306:3306"
     volumes:
@@ -16,6 +16,7 @@ services:
       - app-network
 
   springboot-app:
+    image: apexacademyapp  # Specify your Docker image name here
     build:
       context: .
     container_name: springboot-app
